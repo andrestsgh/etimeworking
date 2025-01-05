@@ -1,3 +1,4 @@
+// Estilos que se cargan automáticamente al crear un proyecto con la plantilla side menu
 ion-menu ion-content {
   --background: var(--ion-item-background, var(--ion-background-color, #fff));
 }
@@ -15,6 +16,8 @@ ion-menu.md ion-list {
 
 ion-menu.md ion-note {
   margin-bottom: 30px;
+  text-align: center;
+  width: 100%;
 }
 
 ion-menu.md ion-list-header,

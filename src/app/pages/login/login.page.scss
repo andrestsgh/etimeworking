@@ -1,6 +1,11 @@
 ion-header {
   --background: transparent;
 }
+.form-login {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .logo-container {
   text-align: center;
@@ -8,7 +13,7 @@ ion-header {
 }
 
 .app-logo {
-  width: 150px; /* Tamaño del logotipo */
+  width: 150px;
   height: auto;
 }
 
@@ -19,14 +24,6 @@ ion-header {
 .errors {
   color: red;
   font-size: 12px;
-}
-
-.remember-container {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
 }
 
 ion-checkbox {

@@ -1,18 +1,18 @@
 export class AuthDTO {
-  user_id: string;
-  access_token: string;
+  token: string;
   email: string;
   password: string;
+  url_picture: string;
 
   constructor(
-    user_id: string,
-    access_token: string,
+    token: string,
     email: string,
-    password: string
+    password: string,
+    url_picture: string = 'assets/img/user-default.png'
   ) {
-    this.user_id = user_id;
-    this.access_token = access_token;
+    this.token = token;
     this.email = email;
     this.password = password;
+    this.url_picture = url_picture;
   }
 }

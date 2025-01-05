@@ -1,18 +1,20 @@
 <ion-app>
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
-      <ion-content>
+      <!-- Sólo se muestra el menú si el usuario está autenticado -->
+      <ion-content *ngIf="user">
         <ion-list id="inbox-list">
           <ion-list-header>e-Time Working</ion-list-header>
-          <ion-avatar slot="start">
-            <img [src]="userPhoto" alt="Foto de Usuario" />
+          <!-- Carga la foto del usuario o una por defecto -->
+          <ion-avatar slot="start" *ngIf="user">
+            <img [src]="user.url_picture || 'assets/img/user-default.png'" alt="Foto de Usuario" />
           </ion-avatar>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
-
-          <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
-            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
-              <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-              <ion-label>{{ p.title }}</ion-label>
+          <ion-note>{{ user.email }}</ion-note>
+          <!-- carga los elementos del menú del componente-->
+          <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages; let i = index">
+            <ion-item routerDirection="root" [routerLink]="[page.url]" lines="none" detail="false" routerLinkActive="selected">
+              <ion-icon aria-hidden="true" slot="start" [ios]="page.icon + '-outline'" [md]="page.icon + '-sharp'"></ion-icon>
+              <ion-label>{{ page.title }}</ion-label>
             </ion-item>
           </ion-menu-toggle>
           <ion-menu-toggle auto-hide="false">

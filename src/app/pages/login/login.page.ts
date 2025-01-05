@@ -1,18 +1,15 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+
 import {
   UntypedFormBuilder,
   UntypedFormControl,
   UntypedFormGroup,
   Validators,
 } from '@angular/forms';
+
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 import { AuthDTO } from 'src/app/models/auth.dto';
-import { AuthService, AuthToken } from 'src/app/services/auth.service';
-//import { HeaderMenus } from 'src/app/Models/header-menus.dto';
-//import { HeaderMenusService } from 'src/app/services/header-menus.service';
-import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { SharedService } from 'src/app/services/shared.service';
 
 @Component({
@@ -21,20 +18,25 @@ import { SharedService } from 'src/app/services/shared.service';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
+  // Contiene el usuario autenticado
   loginUser: AuthDTO;
+
+  // Datos del formulario
   email: UntypedFormControl;
   password: UntypedFormControl;
   loginForm: UntypedFormGroup;
+  // Inicialmente no está marcado el recordar
   rememberMe: boolean = false;
+  debugMessage: string | null = null;
 
+  // Inicializa los datos con las validaciones y restricciones
   constructor(private formBuilder: UntypedFormBuilder,
-    private authService: AuthService,
-    private sharedService: SharedService,
-    //private headerMenusService: HeaderMenusService,
-    private localStorageService: LocalStorageService,
-    private router: Router
+              private authService: AuthService,
+              private router: Router,
+              private sharedService: SharedService
   ) {
-    this.loginUser = new AuthDTO('', '', '', '');
+
+    this.loginUser = new AuthDTO('','','');
 
     this.email = new UntypedFormControl('', [
       Validators.required,
@@ -54,58 +56,38 @@ export class LoginPage implements OnInit {
     
   }
 
-  ngOnInit() {}
+  /***** Si existe un usuario almacenado y estaba activado el remember, reestablece los datos*/
+  ngOnInit() {
+    const user = localStorage.getItem('user');
+    if (localStorage.getItem('remember') == 'true' && user){
+      this.rememberMe = true;
+      this.email.setValue(JSON.parse(user).email);
+      this.password.setValue(JSON.parse(user).password);
+    }
+  }
 
+  /***** login: autentica al usuario y almacena su token */
   login(): void {
-    let responseOK: boolean = false;
-    let errorResponse: any;
-
     this.loginUser.email = this.email.value;
     this.loginUser.password = this.password.value;
 
-    this.authService
-      .login(this.loginUser)
-      .pipe(
-        finalize(async () => {
-          /*await this.sharedService.managementToast(
-            'loginFeedback',
-            responseOK,
-            errorResponse
-          );*/
-
-          if (responseOK) {
-            /*const headerInfo: HeaderMenus = {
-              showAuthSection: true,
-              showNoAuthSection: false,
-            };
-            this.headerMenusService.headerManagement.next(headerInfo);*/
-            this.router.navigate(['fichar']);          
+    this.authService.login(this.loginUser).subscribe(
+        (resp: AuthDTO) => {
+          this.sharedService.showToast('Bienvenido/a '+this.loginUser.email,'success');
+          // Actualiza los datos del usuario
+          this.loginUser = resp;
+          this.loginUser.password = this.password.value;
+          // Guarda el usuario si se activa el remember y en caso contrario sólo el token
+          if (this.rememberMe){
+            localStorage.setItem('user', JSON.stringify(this.loginUser));
+          } else {
+            localStorage.setItem('user', JSON.stringify(new AuthDTO(this.loginUser.token,'','')));
           }
-        })
-      )
-      .subscribe(
-        (resp: AuthToken) => {
-          responseOK = true;
-          this.loginUser.user_id = resp.user_id;
-          this.loginUser.access_token = resp.access_token;
-
-          this.localStorageService.set('user_id', this.loginUser.user_id);
-          this.localStorageService.set(
-            'access_token',
-            this.loginUser.access_token
-          );
-        },
-        (error: HttpErrorResponse) => {
-          responseOK = false;
-          errorResponse = error.error;
-          console.log(errorResponse);
-          /*const headerInfo: HeaderMenus = {
-            showAuthSection: false,
-            showNoAuthSection: true,
-          };
-          this.headerMenusService.headerManagement.next(headerInfo);*/
-
-          this.sharedService.errorLog(error.error);
+          localStorage.setItem('remember',''+this.rememberMe);
+          this.email.setValue('');
+          this.password.setValue('');
+          // Carga la vista para fichar
+          this.router.navigate(['fichar'], { queryParams: { reload: true }});
         }
       );
   }
